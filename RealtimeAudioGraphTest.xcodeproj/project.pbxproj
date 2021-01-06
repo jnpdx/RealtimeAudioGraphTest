@@ -24,6 +24,7 @@
 		D25EF4EC25A67387005A1A8D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		D25EF4EF25A67387005A1A8D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D25EF4F125A67387005A1A8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D25EF4F825A67392005A1A8D /* RealtimeAudioGraphTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RealtimeAudioGraphTest.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +57,7 @@
 		D25EF4E225A67383005A1A8D /* RealtimeAudioGraphTest */ = {
 			isa = PBXGroup;
 			children = (
+				D25EF4F825A67392005A1A8D /* RealtimeAudioGraphTest.entitlements */,
 				D25EF4E325A67383005A1A8D /* AppDelegate.swift */,
 				D25EF4E525A67383005A1A8D /* SceneDelegate.swift */,
 				D25EF4E725A67383005A1A8D /* ContentView.swift */,
@@ -286,17 +288,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RealtimeAudioGraphTest/RealtimeAudioGraphTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"RealtimeAudioGraphTest/Preview Content\"";
 				DEVELOPMENT_TEAM = PU59A74F57;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = RealtimeAudioGraphTest/Info.plist;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 13.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnnastos.RealtimeAudioGraphTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -307,17 +312,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = RealtimeAudioGraphTest/RealtimeAudioGraphTest.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"RealtimeAudioGraphTest/Preview Content\"";
 				DEVELOPMENT_TEAM = PU59A74F57;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = RealtimeAudioGraphTest/Info.plist;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 13.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnnastos.RealtimeAudioGraphTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
