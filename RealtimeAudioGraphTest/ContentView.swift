@@ -7,13 +7,15 @@
 
 import SwiftUI
 import Combine
+import os.log
 
 class DataProvider : ObservableObject {
     var timer : Timer?
     
     var dataPublisher : AnyPublisher<[Float], Never> {
         return dataSubject
-            .throttle(for: .milliseconds(Int(1.0 / 60.0 * 1000.0)), scheduler: RunLoop.main, latest: false)
+            .receive(on: RunLoop.main)
+            .throttle(for: .milliseconds(Int(1.0 / 30.0 * 1000.0)), scheduler: RunLoop.main, latest: false)
             .eraseToAnyPublisher()
     }
     private let dataSubject = CurrentValueSubject<[Float], Never>([0.0])
@@ -27,13 +29,13 @@ class DataProvider : ObservableObject {
         generate = true
         var floatData = [Float](repeating: 0, count: 1000)
 
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.global(qos: .default).async {
             while self.generate {
                 for index in 0..<floatData.count {
                     floatData[index] = Float.random(in: 0...1.0)
                 }
                 self.dataSubject.send(floatData)
-                usleep(20_000)
+                usleep(1_000_000 / 60)
             }
         }
     }
@@ -53,6 +55,7 @@ struct ContentView: View {
         AudioVisualization(graphData: valuesToDisplay)
         .padding()
         .onReceive(dataProvider.dataPublisher) { newValue in
+            //os_log("New value: %f",(Date().timeIntervalSince1970))
             valuesToDisplay = newValue
         }
         .onAppear {
@@ -71,6 +74,7 @@ struct AudioVisualization: View {
             
             //draw a grid every 1000 samples
             Path { path in
+                //os_log("Frame: %f",(Date().timeIntervalSince1970))
                 let gridColumnWidth = CGFloat(1000) / CGFloat(kSamplesPerPixel)
                 for gridColumnIndex in 0..<Int(geometry.size.width/gridColumnWidth) {
                     path.move(to: CGPoint(x: CGFloat(gridColumnIndex) * gridColumnWidth, y: 0))
@@ -78,12 +82,13 @@ struct AudioVisualization: View {
                 }
             }
             .stroke(Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 0.1))
+            .drawingGroup()
             
             //the waveform
             Path { path in
                 let pointWidth = geometry.size.width / CGFloat(graphData.count)
                 let halfHeight = geometry.size.height / 2
-                for pointIndex in 0..<graphData.count {
+                for pointIndex in 0..<graphData.count {//min(5,graphData.count) {
                     let pointValue = graphData[pointIndex]
                     let xPos = CGFloat(pointIndex) * pointWidth
                     let yLength = max(0.5,halfHeight * CGFloat(pointValue))
@@ -93,7 +98,8 @@ struct AudioVisualization: View {
                 }
             }
             .stroke()
-        }.drawingGroup()
+            .drawingGroup()
+        }
     }
 }
 
