@@ -124,7 +124,6 @@ class AudioInputController : ObservableObject {
 struct ContentView: View {
     @ObservedObject var dataProvider = DataProvider()
     var audioInputController = AudioInputController()
-    //@State var valuesToDisplay : ContiguousArray<Float> = []
     @State var timestamp : UInt64 = 0
     
     @State private var cancelables = Set<AnyCancellable>()
@@ -136,7 +135,7 @@ struct ContentView: View {
 //                Text("\(valueToDisplay[0]),\(valueToDisplay[1])")
 //            }
 //        }
-        AudioVisualization(timestamp: timestamp, audioInputController: audioInputController)
+        AudioVisualization(timestamp: timestamp, bufferData: audioInputController.audioBuffer)
         .padding()
         .onReceive(dataProvider.dataPublisher) { newValue in
             //valuesToDisplay = newValue
@@ -162,14 +161,13 @@ let kSamplesPerPixel : UInt32 = 40
 
 struct AudioVisualization: View {
     var timestamp : UInt64
-    var audioInputController : AudioInputController
+    var bufferData : [Float]
     
     var body: some View {
         GeometryReader { geometry in
             
             //draw a grid every 1000 samples
             Path { path in
-                //os_log("Frame: %f",(Date().timeIntervalSince1970))
                 let gridColumnWidth = CGFloat(1000) / CGFloat(kSamplesPerPixel)
                 for gridColumnIndex in 0..<Int(geometry.size.width/gridColumnWidth) {
                     path.move(to: CGPoint(x: CGFloat(gridColumnIndex) * gridColumnWidth, y: 0))
@@ -181,10 +179,10 @@ struct AudioVisualization: View {
             
             //the waveform
             Path { path in
-                let pointWidth = geometry.size.width / CGFloat(audioInputController.audioBuffer.count)
+                let pointWidth = geometry.size.width / CGFloat(bufferData.count)
                 let halfHeight = geometry.size.height / 2
-                for pointIndex in 0..<audioInputController.audioBuffer.count {//min(5,graphData.count) {
-                    let pointValue = audioInputController.audioBuffer[pointIndex]
+                for pointIndex in 0..<bufferData.count {//min(5,graphData.count) {
+                    let pointValue = bufferData[pointIndex]
                     let xPos = CGFloat(pointIndex) * pointWidth
                     let yLength = max(0.5,halfHeight * CGFloat(pointValue))
                     path.move(to: CGPoint(x: xPos,
