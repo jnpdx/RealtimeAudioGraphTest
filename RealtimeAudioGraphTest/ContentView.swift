@@ -83,9 +83,10 @@ class AudioInputController : ObservableObject {
             memcpy(&processingBuffer2, &self.audioBuffer, MemoryLayout<Float32>.size * processingBuffer2.count)
 
             //stick the processing buffer at the end of the audio buffer
-            for frameIndex in 0..<pixelCount {
-                self.audioBuffer[self.audioBuffer.count - pixelCount + frameIndex] = processingBuffer[frameIndex]
-            }
+//            for frameIndex in 0..<pixelCount {
+//                self.audioBuffer[self.audioBuffer.count - pixelCount + frameIndex] = processingBuffer[frameIndex]
+//            }
+            memcpy(&self.audioBuffer[self.audioBuffer.count - pixelCount], &processingBuffer, MemoryLayout<Float32>.size * pixelCount)
             
             _ = processingBuffer2.withUnsafeBufferPointer { (rawBufferPointer) in
                 memcpy(&self.audioBuffer, rawBufferPointer.baseAddress! + pixelCount, MemoryLayout<Float32>.size *  (processingBuffer2.count - pixelCount))
