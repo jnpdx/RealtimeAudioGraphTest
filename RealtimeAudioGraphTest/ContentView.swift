@@ -61,8 +61,6 @@ class AudioInputController : ObservableObject {
         var high:Float = 1.0
         var low:Float = 0.0
         
-        let ptr = UnsafePointer<Float>(processingBuffer2)
-        
         let recordingFormat = audioEngine.inputNode.inputFormat(forBus: 0)
         audioEngine.inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (pcmBuffer, timestamp) in
             
@@ -89,7 +87,9 @@ class AudioInputController : ObservableObject {
                 self.audioBuffer[self.audioBuffer.count - pixelCount + frameIndex] = processingBuffer[frameIndex]
             }
             
-            memcpy(&self.audioBuffer, ptr + pixelCount, MemoryLayout<Float32>.size *  (processingBuffer2.count - pixelCount))
+            _ = processingBuffer2.withUnsafeBufferPointer { (rawBufferPointer) in
+                memcpy(&self.audioBuffer, rawBufferPointer.baseAddress! + pixelCount, MemoryLayout<Float32>.size *  (processingBuffer2.count - pixelCount))
+            }
             
             self.dataSubject.send(Float.random(in: 0.0...2.0))
         }
