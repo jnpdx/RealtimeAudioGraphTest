@@ -135,7 +135,10 @@ struct ContentView: View {
 //                Text("\(valueToDisplay[0]),\(valueToDisplay[1])")
 //            }
 //        }
-        AudioVisualization(timestamp: timestamp, bufferData: audioInputController.audioBuffer)
+        AudioVisualization(timestamp: timestamp,
+                           bufferData: audioInputController.audioBuffer,
+                           startPoint: 0,
+                           endPoint: audioInputController.audioBuffer.count)
         .padding()
         .onReceive(dataProvider.dataPublisher) { newValue in
             //valuesToDisplay = newValue
@@ -162,6 +165,8 @@ let kSamplesPerPixel : UInt32 = 40
 struct AudioVisualization: View {
     var timestamp : UInt64
     var bufferData : [Float]
+    var startPoint : Int
+    var endPoint : Int
     
     var body: some View {
         GeometryReader { geometry in
@@ -179,10 +184,10 @@ struct AudioVisualization: View {
             
             //the waveform
             Path { path in
-                let pointWidth = geometry.size.width / CGFloat(bufferData.count)
+                let pointWidth = geometry.size.width / CGFloat(endPoint - startPoint)
                 let halfHeight = geometry.size.height / 2
-                for pointIndex in 0..<bufferData.count {//min(5,graphData.count) {
-                    let pointValue = bufferData[pointIndex]
+                for pointIndex in 0..<(endPoint - startPoint) {//min(5,graphData.count) {
+                    let pointValue = bufferData[startPoint + pointIndex]
                     let xPos = CGFloat(pointIndex) * pointWidth
                     let yLength = max(0.5,halfHeight * CGFloat(pointValue))
                     path.move(to: CGPoint(x: xPos,
