@@ -57,8 +57,11 @@ class AudioInputController : ObservableObject {
         audioEngine = AVAudioEngine()
         
         var processingBuffer = [Float](repeating: 0.0, count: 9000)
+        var processingBuffer2 = [Float](repeating: 0.0, count: 9000)
         var high:Float = 1.0
         var low:Float = 0.0
+        
+        let ptr = UnsafePointer<Float>(processingBuffer2)
         
         let recordingFormat = audioEngine.inputNode.inputFormat(forBus: 0)
         audioEngine.inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (pcmBuffer, timestamp) in
@@ -78,26 +81,15 @@ class AudioInputController : ObservableObject {
                             vDSP_Length(pixelCount),
                             vDSP_Length(samplesPerPixel))
             
-            //memmove(&self.audioBuffer[0], &self.audioBuffer[pixelCount], MemoryLayout<Float32>.size * 2)
             
-            //shift everything left
-            //this is the only one that works...
-            for frameIndex in 0..<self.audioBuffer.count {
-                let pullIndex = frameIndex + pixelCount
-                guard pullIndex < self.audioBuffer.count else {
-                    break
-                }
-                self.audioBuffer[frameIndex] = self.audioBuffer[pullIndex]
-            }
-            
-            
-//            var input : Float = 0.0
-//            vDSP_vsadd(&self.audioBuffer[pixelCount], 1, &input, &self.audioBuffer[0], 1, vDSP_Length (self.audioBuffer.count - pixelCount))
-            
+            memcpy(&processingBuffer2, &self.audioBuffer, MemoryLayout<Float32>.size * processingBuffer2.count)
+
             //stick the processing buffer at the end of the audio buffer
             for frameIndex in 0..<pixelCount {
                 self.audioBuffer[self.audioBuffer.count - pixelCount + frameIndex] = processingBuffer[frameIndex]
             }
+            
+            memcpy(&self.audioBuffer, ptr + pixelCount, MemoryLayout<Float32>.size *  (processingBuffer2.count - pixelCount))
             
             self.dataSubject.send(Float.random(in: 0.0...2.0))
         }
