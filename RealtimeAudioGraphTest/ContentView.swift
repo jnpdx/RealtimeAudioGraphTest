@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 import AVFoundation
+import Accelerate
 import os.log
 
 class DataProvider : ObservableObject {
@@ -43,31 +44,60 @@ class DataProvider : ObservableObject {
 }
 
 class AudioInputController : ObservableObject {
-    var audioBuffer : ContiguousArray<Float> = ContiguousArray<Float>(repeating: 0.0, count: 8000)
+    var audioBuffer = [Float](repeating: 0.0, count: 9000)
     private let dataSubject = CurrentValueSubject<Float, Never>(0.0)
     var dataPublisher : AnyPublisher<Float, Never> {
         dataSubject
             .eraseToAnyPublisher()
     }
-    var audioEngine = AVAudioEngine()
+    private var audioEngine = AVAudioEngine()
     
     func setupEngine() {
         setupAudioSession()
         audioEngine = AVAudioEngine()
+        
+        var processingBuffer = [Float](repeating: 0.0, count: 9000)
+        var high:Float = 1.0
+        var low:Float = 0.0
+        
         let recordingFormat = audioEngine.inputNode.inputFormat(forBus: 0)
         audioEngine.inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (pcmBuffer, timestamp) in
-            //take the previous frames and shift them left
-
-            let insertionIndex = (self.audioBuffer.count - Int(pcmBuffer.frameLength))
-//
-//            var bufferCopy = self.audioBuffer
-//
-//            memcpy(&self.audioBuffer[0], &bufferCopy[Int(pcmBuffer.frameLength)], insertionIndex * MemoryLayout<Float32>.size)
-//
-            //write the new stuff onto the end
-            memcpy(&self.audioBuffer[insertionIndex], pcmBuffer.floatChannelData!.pointee, MemoryLayout<Float32>.size * Int(pcmBuffer.frameLength))
-            //memset(&self.audioBuffer[0], 0, MemoryLayout<Float32>.size)
-            //self.audioBuffer[0] = Float.random(in: 0.0...1.0)
+            
+            let samplesPerPixel = 40
+            let bufferLength = vDSP_Length(pcmBuffer.frameLength)
+            
+            vDSP_vabs(pcmBuffer.floatChannelData![0], 1, &processingBuffer, 1, bufferLength)
+            vDSP_vclip(processingBuffer, 1, &low, &high, &processingBuffer, 1, bufferLength)
+            
+            let pixelCount = Int(pcmBuffer.frameLength) / samplesPerPixel
+            let filter = [Float](repeating: 1.0/Float(samplesPerPixel), count: Int(samplesPerPixel))
+            
+            vDSP_desamp(processingBuffer,
+                            vDSP_Stride(samplesPerPixel),
+                            filter, &processingBuffer,
+                            vDSP_Length(pixelCount),
+                            vDSP_Length(samplesPerPixel))
+            
+            //memmove(&self.audioBuffer[0], &self.audioBuffer[pixelCount], MemoryLayout<Float32>.size * 2)
+            
+            //shift everything left
+            //this is the only one that works...
+            for frameIndex in 0..<self.audioBuffer.count {
+                let pullIndex = frameIndex + pixelCount
+                guard pullIndex < self.audioBuffer.count else {
+                    break
+                }
+                self.audioBuffer[frameIndex] = self.audioBuffer[pullIndex]
+            }
+            
+            
+//            var input : Float = 0.0
+//            vDSP_vsadd(&self.audioBuffer[pixelCount], 1, &input, &self.audioBuffer[0], 1, vDSP_Length (self.audioBuffer.count - pixelCount))
+            
+            //stick the processing buffer at the end of the audio buffer
+            for frameIndex in 0..<pixelCount {
+                self.audioBuffer[self.audioBuffer.count - pixelCount + frameIndex] = processingBuffer[frameIndex]
+            }
             
             self.dataSubject.send(Float.random(in: 0.0...2.0))
         }
