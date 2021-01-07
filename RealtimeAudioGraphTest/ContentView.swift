@@ -11,38 +11,6 @@ import AVFoundation
 import Accelerate
 import os.log
 
-class DataProvider : ObservableObject {
-    var timer : Timer?
-    
-    var dataPublisher : AnyPublisher<[Float], Never> {
-        return dataSubject
-            .receive(on: RunLoop.main)
-            .throttle(for: .milliseconds(Int(1.0 / 30.0 * 1000.0)), scheduler: RunLoop.main, latest: false)
-            .eraseToAnyPublisher()
-    }
-    private let dataSubject = CurrentValueSubject<[Float], Never>([0.0])
-    private var generate = false
-    
-    init() {
-        
-    }
-    
-    func startGenerating() {
-        generate = true
-        var floatData = [Float](repeating: 0, count: 1000)
-
-        DispatchQueue.global(qos: .default).async {
-            while self.generate {
-                for index in 0..<floatData.count {
-                    floatData[index] = Float.random(in: 0...1.0)
-                }
-                self.dataSubject.send(floatData)
-                usleep(1_000_000 / 60)
-            }
-        }
-    }
-}
-
 class AudioInputController : ObservableObject {
     var audioBuffer = [Float](repeating: 0.0, count: 9000)
     private let dataSubject = CurrentValueSubject<Float, Never>(0.0)
@@ -122,27 +90,17 @@ class AudioInputController : ObservableObject {
 }
 
 struct ContentView: View {
-    @ObservedObject var dataProvider = DataProvider()
     var audioInputController = AudioInputController()
     @State var timestamp : UInt64 = 0
     
     @State private var cancelables = Set<AnyCancellable>()
     
     var body: some View {
-//        VStack {
-//            Text("Hello, world!")
-//            if valueToDisplay.count > 1 {
-//                Text("\(valueToDisplay[0]),\(valueToDisplay[1])")
-//            }
-//        }
         AudioVisualization(timestamp: timestamp,
                            bufferData: audioInputController.audioBuffer,
                            startPoint: 0,
                            endPoint: audioInputController.audioBuffer.count)
         .padding()
-        .onReceive(dataProvider.dataPublisher) { newValue in
-            //valuesToDisplay = newValue
-        }
         .onAppear {
             //dataProvider.startGenerating()
             audioInputController.setupEngine()
@@ -153,7 +111,6 @@ struct ContentView: View {
                     //.throttle(for: .milliseconds(Int(1.0 / 200.0 * 1000.0)), scheduler: RunLoop.main, latest: false)
                     .sink { _ in
                         self.timestamp = mach_absolute_time()
-                        //self.valuesToDisplay = audioInputController.audioBuffer
                 }
             )
         }
