@@ -13,6 +13,8 @@
 		D25EF4EA25A67387005A1A8D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D25EF4E925A67387005A1A8D /* Assets.xcassets */; };
 		D25EF4ED25A67387005A1A8D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D25EF4EC25A67387005A1A8D /* Preview Assets.xcassets */; };
 		D25EF4F025A67387005A1A8D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D25EF4EE25A67387005A1A8D /* LaunchScreen.storyboard */; };
+		D2AA325C25A7D39A007C3C70 /* AudioVisualization.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AA325B25A7D39A007C3C70 /* AudioVisualization.swift */; };
+		D2AA325F25A7D3CF007C3C70 /* AudioInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AA325E25A7D3CF007C3C70 /* AudioInputController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +27,8 @@
 		D25EF4EF25A67387005A1A8D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D25EF4F125A67387005A1A8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D25EF4F825A67392005A1A8D /* RealtimeAudioGraphTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RealtimeAudioGraphTest.entitlements; sourceTree = "<group>"; };
+		D2AA325B25A7D39A007C3C70 /* AudioVisualization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioVisualization.swift; sourceTree = "<group>"; };
+		D2AA325E25A7D3CF007C3C70 /* AudioInputController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +65,8 @@
 				D25EF4E325A67383005A1A8D /* AppDelegate.swift */,
 				D25EF4E525A67383005A1A8D /* SceneDelegate.swift */,
 				D25EF4E725A67383005A1A8D /* ContentView.swift */,
+				D2AA325E25A7D3CF007C3C70 /* AudioInputController.swift */,
+				D2AA325B25A7D39A007C3C70 /* AudioVisualization.swift */,
 				D25EF4E925A67387005A1A8D /* Assets.xcassets */,
 				D25EF4EE25A67387005A1A8D /* LaunchScreen.storyboard */,
 				D25EF4F125A67387005A1A8D /* Info.plist */,
@@ -148,8 +154,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				D25EF4E425A67383005A1A8D /* AppDelegate.swift in Sources */,
+				D2AA325F25A7D3CF007C3C70 /* AudioInputController.swift in Sources */,
 				D25EF4E625A67383005A1A8D /* SceneDelegate.swift in Sources */,
 				D25EF4E825A67383005A1A8D /* ContentView.swift in Sources */,
+				D2AA325C25A7D39A007C3C70 /* AudioVisualization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
