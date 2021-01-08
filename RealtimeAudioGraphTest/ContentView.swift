@@ -22,10 +22,11 @@ struct ContentView: View {
                                bufferData: audioInputController.audioBuffer,
                                startPoint: 0,
                                endPoint: audioInputController.audioBuffer.count)
-            AudioVisualization(timestamp: 0,
-                               bufferData: fileController.audioBuffer,
-                               startPoint: 0,
-                               endPoint: min(500,fileController.audioBuffer.count))
+//            AudioVisualization(timestamp: 0,
+//                               bufferData: fileController.audioBuffer,
+//                               startPoint: 0,
+//                               endPoint: min(500,fileController.audioBuffer.count))
+            AudioVisualizationScroller(bufferData: fileController.audioBuffer)
             AudioVisualization(timestamp: 0,
                                bufferData: fileController.audioBuffer,
                                startPoint: min(1000,fileController.audioBuffer.count),

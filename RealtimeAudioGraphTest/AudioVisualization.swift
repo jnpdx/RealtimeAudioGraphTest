@@ -34,7 +34,13 @@ struct AudioVisualization: View {
             Path { path in
                 let pointWidth = geometry.size.width / CGFloat(endPoint - startPoint)
                 let halfHeight = geometry.size.height / 2
+                guard endPoint > startPoint else {
+                    return
+                }
                 for pointIndex in 0..<(endPoint - startPoint) {//min(5,graphData.count) {
+                    guard startPoint + pointIndex > 0 else {
+                        continue
+                    }
                     let pointValue = bufferData[startPoint + pointIndex]
                     let xPos = CGFloat(pointIndex) * pointWidth
                     let yLength = max(0.5,halfHeight * CGFloat(pointValue))
