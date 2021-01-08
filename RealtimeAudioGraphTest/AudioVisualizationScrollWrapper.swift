@@ -12,20 +12,16 @@ import SwiftUI
 struct AudioVisualizationScroller : View {
     var bufferData : [Float]
     @State private var startPoint : Int = 0
-    @State private var scrollerWidth: Int = 0
-    @State private var zoom: Double = 1.0
+    @State private var endPoint: Int = 0
     
     var body: some View {
         ZStack {
             AudioVisualization(timestamp: 0,
                                bufferData: bufferData,
-                               startPoint: Int(Double(startPoint) / zoom),
-                               endPoint: min(bufferData.count, Int(Double(startPoint + scrollerWidth) / zoom))
-            )
+                               startPoint: startPoint,
+                               endPoint: endPoint)
             AudioVisualizationScroller_ScrollView(bufferLength: bufferData.count,
-                                                  startPoint: $startPoint,
-                                                  scrollerWidth: $scrollerWidth,
-                                                  zoomBinding: $zoom)
+                                                  startPoint: $startPoint, endPoint: $endPoint)
         }
     }
 }
@@ -36,25 +32,27 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
     
     var bufferLength : Int
     var startPoint : Binding<Int>
-    var scrollerWidth : Binding<Int>
-    var zoomBinding: Binding<Double>
+    var endPoint: Binding<Int>
     
     class Coordinator : NSObject, UIScrollViewDelegate, UIGestureRecognizerDelegate {
-        var startPointBinding : Binding<Int>
-        var scrollWidthBinding: Binding<Int>
-        var zoomBinding: Binding<Double>
+        var bufferLength : Int
+        var startPoint : Binding<Int>
+        var endPoint: Binding<Int>
         
         var scrollView : UIScrollView?
         
-        private var zoomScaleStart : Double = 0
+        private var zoomScaleStart : CGFloat = 0
+        private var zoomScale: CGFloat = 0.5
+        
+        var scrollViewWidth: CGFloat = 0
         var scrollOffsetPercentage : CGFloat = 0
         
         private var ignoreScrollEvents = false
         
-        init(start: Binding<Int>, width: Binding<Int>, zoom: Binding<Double>) {
-            self.startPointBinding = start
-            self.scrollWidthBinding = width
-            self.zoomBinding = zoom
+        init(start: Binding<Int>, end: Binding<Int>, bufferLength: Int) {
+            self.bufferLength = bufferLength
+            self.startPoint = start
+            self.endPoint = end
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -64,7 +62,7 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
             
             scrollOffsetPercentage = scrollView.contentOffset.x / scrollView.contentSize.width
             DispatchQueue.main.async {
-                self.startPointBinding.wrappedValue = Int(scrollView.contentOffset.x)
+                self.updateBindings()
             }
         }
         
@@ -75,7 +73,7 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
         @objc func pinchGesture(_ gc: UIPinchGestureRecognizer) {
             switch gc.state {
             case .began:
-                zoomScaleStart = zoomBinding.wrappedValue
+                zoomScaleStart = zoomScale
                 ignoreScrollEvents = true
             case .cancelled, .ended, .failed:
                 ignoreScrollEvents = false
@@ -83,25 +81,54 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
                 break
             }
             
-            var newZoom : Double = zoomBinding.wrappedValue
+            var newZoom : CGFloat = zoomScale
             
             switch gc.scale {
             case let scale where scale == 1.0:
                 newZoom = 1.0
             case let scale where scale < 1.0:
-                newZoom = max(Double(scale) * zoomScaleStart, 0.2)
+                newZoom = max(scale * zoomScaleStart, 0.2)
             case let scale where scale > 1.0:
-                newZoom = min(Double(scale) * zoomScaleStart, 3.0)
+                newZoom = min(scale * zoomScaleStart, 3.0)
             default:
                 break
             }
             
-            zoomBinding.wrappedValue = newZoom
+            zoomScale = newZoom
+            
+            DispatchQueue.main.async {
+                self.updateBindings()
+            }
+        }
+        
+        func updateBindings() {
+            guard let scrollView = scrollView else {
+                fatalError()
+            }
+            //1000 pts of data
+            //normally 1000pts wide
+            //window = 200pts wide
+            //zoom: 0.5
+            //turns into 500pts wide
+            //content offset : 25%
+            //originally should have been 250-350
+            //with zoom, should be 125-325
+            
+            let contentWidth = CGFloat(bufferLength) * zoomScale
+            scrollView.contentSize = CGSize(width: contentWidth,
+                                            height: scrollView.frame.size.height)
+            
+            
+            let startPoint = CGFloat(bufferLength) * scrollOffsetPercentage
+            let endPoint = startPoint + scrollView.frame.size.width / zoomScale
+            
+            self.startPoint.wrappedValue = Int(startPoint)
+            self.endPoint.wrappedValue = min(bufferLength,Int(endPoint))
         }
     }
     
     func makeCoordinator() -> Coordinator {
-        let coordinator = Coordinator(start: startPoint, width: scrollerWidth, zoom: zoomBinding)
+        let coordinator = Coordinator(start: startPoint, end: endPoint, bufferLength: bufferLength)
         return coordinator
     }
     
@@ -112,22 +139,17 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
         pinchGR.delegate = context.coordinator
         scrollView.addGestureRecognizer(pinchGR)
         context.coordinator.scrollView = scrollView
+        DispatchQueue.main.async {
+            context.coordinator.updateBindings()
+        }
         return scrollView
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        let width = CGFloat(bufferLength) * CGFloat(zoomBinding.wrappedValue)
-        if uiView.contentSize.width.rounded(.up) != width.rounded(.up) {
-            //print("Updating scrollview of size: \(uiView.frame) to content width: \(width)")
-            
-            DispatchQueue.main.async {
-                uiView.contentSize = CGSize(width: width,
-                                            height: uiView.frame.size.height)
-                uiView.contentOffset.x = width * context.coordinator.scrollOffsetPercentage
-                startPoint.wrappedValue = Int(uiView.contentOffset.x)
-                scrollerWidth.wrappedValue = Int(uiView.frame.width)
-            }
-            
+        context.coordinator.scrollViewWidth = uiView.frame.width
+        context.coordinator.bufferLength = bufferLength
+        DispatchQueue.main.async {
+            context.coordinator.updateBindings()
         }
     }
 }
