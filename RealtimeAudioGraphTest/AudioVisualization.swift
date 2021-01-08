@@ -19,6 +19,7 @@ struct AudioVisualization: View {
     var body: some View {
         GeometryReader { geometry in
             
+            //TODO: zoom
             //draw a grid every 1000 samples
             Path { path in
                 let gridColumnWidth = CGFloat(1000) / CGFloat(kSamplesPerPixel)
@@ -37,7 +38,7 @@ struct AudioVisualization: View {
                 guard endPoint > startPoint else {
                     return
                 }
-                for pointIndex in 0..<(endPoint - startPoint) {//min(5,graphData.count) {
+                for pointIndex in 0..<(endPoint - startPoint) {
                     guard startPoint + pointIndex > 0 else {
                         continue
                     }

@@ -32,7 +32,7 @@ struct ContentView: View {
         
         
         .onAppear {
-            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "Sweet Georgia Brown", withExtension: "m4a")!) {
+            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "OriginalAudio", withExtension: "m4a")!) {
                 fileController.loadAndProcessBuffer(pcmBuffer: pcmBuffer)
             }
             audioInputController.setupEngine()
