@@ -22,21 +22,17 @@ struct ContentView: View {
                                bufferData: audioInputController.audioBuffer,
                                startPoint: 0,
                                endPoint: audioInputController.audioBuffer.count)
+            AudioVisualizationScroller(bufferData: fileController.audioBuffer)
 //            AudioVisualization(timestamp: 0,
 //                               bufferData: fileController.audioBuffer,
-//                               startPoint: 0,
-//                               endPoint: min(500,fileController.audioBuffer.count))
-            AudioVisualizationScroller(bufferData: fileController.audioBuffer)
-            AudioVisualization(timestamp: 0,
-                               bufferData: fileController.audioBuffer,
-                               startPoint: min(1000,fileController.audioBuffer.count),
-                               endPoint: min(4000,fileController.audioBuffer.count))
+//                               startPoint: min(1000,fileController.audioBuffer.count),
+//                               endPoint: min(4000,fileController.audioBuffer.count))
         }
         .padding()
         
         
         .onAppear {
-            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "OriginalAudio", withExtension: "m4a")!) {
+            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "Sweet Georgia Brown", withExtension: "m4a")!) {
                 fileController.loadAndProcessBuffer(pcmBuffer: pcmBuffer)
             }
             audioInputController.setupEngine()

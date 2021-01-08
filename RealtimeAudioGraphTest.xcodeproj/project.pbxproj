@@ -17,6 +17,7 @@
 		D2AA325F25A7D3CF007C3C70 /* AudioInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AA325E25A7D3CF007C3C70 /* AudioInputController.swift */; };
 		D2AA326225A7D553007C3C70 /* OriginalAudio.m4a in Resources */ = {isa = PBXBuildFile; fileRef = D2AA326125A7D553007C3C70 /* OriginalAudio.m4a */; };
 		D2AA326525A7FDC6007C3C70 /* AudioVisualizationScrollWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AA326425A7FDC6007C3C70 /* AudioVisualizationScrollWrapper.swift */; };
+		D2AA326925A80974007C3C70 /* Sweet Georgia Brown.m4a in Resources */ = {isa = PBXBuildFile; fileRef = D2AA326825A80974007C3C70 /* Sweet Georgia Brown.m4a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		D2AA325E25A7D3CF007C3C70 /* AudioInputController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputController.swift; sourceTree = "<group>"; };
 		D2AA326125A7D553007C3C70 /* OriginalAudio.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = OriginalAudio.m4a; sourceTree = "<group>"; };
 		D2AA326425A7FDC6007C3C70 /* AudioVisualizationScrollWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioVisualizationScrollWrapper.swift; sourceTree = "<group>"; };
+		D2AA326825A80974007C3C70 /* Sweet Georgia Brown.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Sweet Georgia Brown.m4a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,7 @@
 				D2AA325B25A7D39A007C3C70 /* AudioVisualization.swift */,
 				D2AA326425A7FDC6007C3C70 /* AudioVisualizationScrollWrapper.swift */,
 				D2AA326125A7D553007C3C70 /* OriginalAudio.m4a */,
+				D2AA326825A80974007C3C70 /* Sweet Georgia Brown.m4a */,
 				D25EF4E925A67387005A1A8D /* Assets.xcassets */,
 				D25EF4EE25A67387005A1A8D /* LaunchScreen.storyboard */,
 				D25EF4F125A67387005A1A8D /* Info.plist */,
@@ -150,6 +153,7 @@
 				D25EF4F025A67387005A1A8D /* LaunchScreen.storyboard in Resources */,
 				D25EF4ED25A67387005A1A8D /* Preview Assets.xcassets in Resources */,
 				D25EF4EA25A67387005A1A8D /* Assets.xcassets in Resources */,
+				D2AA326925A80974007C3C70 /* Sweet Georgia Brown.m4a in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -318,7 +322,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.johnnastos.RealtimeAudioGraphTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

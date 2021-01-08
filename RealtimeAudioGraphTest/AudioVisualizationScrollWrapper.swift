@@ -20,11 +20,9 @@ struct AudioVisualizationScroller : View {
                                bufferData: bufferData,
                                startPoint: startPoint,
                                endPoint: min(bufferData.count, startPoint + scrollerWidth))
-                .border(Color.blue)
             AudioVisualizationScroller_ScrollView(bufferLength: bufferData.count,
                                                   startPoint: $startPoint,
                                                   scrollerWidth: $scrollerWidth)
-                .border(Color.red)
         }
     }
 }
