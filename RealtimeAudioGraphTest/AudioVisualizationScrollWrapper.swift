@@ -94,33 +94,42 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
                 break
             }
             
-            zoomScale = newZoom
-            
             DispatchQueue.main.async {
-                self.updateBindings()
+                self.postZoomCalculations(originalZoom: self.zoomScale, newZoom: newZoom)
             }
+        }
+        
+        func postZoomCalculations(originalZoom: CGFloat, newZoom: CGFloat) {
+//            guard let scrollView = self.scrollView else {
+//                fatalError()
+//            }
+            
+            zoomScale = newZoom
+            updateBindings()
+        }
+        
+        var windowSize: CGFloat {
+            (scrollView?.frame.size.width ?? 0) / zoomScale
+        }
+        
+        var contentWidth: CGFloat {
+            return CGFloat(bufferLength) * zoomScale
         }
         
         func updateBindings() {
             guard let scrollView = scrollView else {
                 fatalError()
             }
-            //1000 pts of data
-            //normally 1000pts wide
-            //window = 200pts wide
-            //zoom: 0.5
-            //turns into 500pts wide
-            //content offset : 25%
-            //originally should have been 250-350
-            //with zoom, should be 125-325
-            
-            let contentWidth = CGFloat(bufferLength) * zoomScale
             scrollView.contentSize = CGSize(width: contentWidth,
                                             height: scrollView.frame.size.height)
+            //this doesn't keep things centered yet
+            scrollOffsetPercentage = scrollView.contentOffset.x / scrollView.contentSize.width
             
             
             let startPoint = CGFloat(bufferLength) * scrollOffsetPercentage
-            let endPoint = startPoint + scrollView.frame.size.width / zoomScale
+            let endPoint = startPoint + windowSize
+            
+            //print("Start point: \(startPoint) - \(endPoint) vs buffer: \(bufferLength)")
             
             self.startPoint.wrappedValue = Int(startPoint)
             self.endPoint.wrappedValue = min(bufferLength,Int(endPoint))
