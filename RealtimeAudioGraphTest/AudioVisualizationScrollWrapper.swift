@@ -49,6 +49,8 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
         private var zoomScaleStart : Double = 0
         var scrollOffsetPercentage : CGFloat = 0
         
+        private var ignoreScrollEvents = false
+        
         init(start: Binding<Int>, width: Binding<Int>, zoom: Binding<Double>) {
             self.startPointBinding = start
             self.scrollWidthBinding = width
@@ -56,6 +58,10 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            guard !ignoreScrollEvents else {
+                return
+            }
+            
             scrollOffsetPercentage = scrollView.contentOffset.x / scrollView.contentSize.width
             DispatchQueue.main.async {
                 self.startPointBinding.wrappedValue = Int(scrollView.contentOffset.x)
@@ -70,6 +76,9 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
             switch gc.state {
             case .began:
                 zoomScaleStart = zoomBinding.wrappedValue
+                ignoreScrollEvents = true
+            case .cancelled, .ended, .failed:
+                ignoreScrollEvents = false
             default:
                 break
             }
@@ -108,14 +117,17 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
         let width = CGFloat(bufferLength) * CGFloat(zoomBinding.wrappedValue)
-        if uiView.contentSize.width != width {
-            print("Updating scrollview of size: \(uiView.frame) to content width: \(width)")
-            uiView.contentSize = CGSize(width: width,
-                                        height: uiView.frame.size.height)
-            uiView.contentOffset.x = context.coordinator.scrollOffsetPercentage * width
+        if uiView.contentSize.width.rounded(.up) != width.rounded(.up) {
+            //print("Updating scrollview of size: \(uiView.frame) to content width: \(width)")
+            
             DispatchQueue.main.async {
+                uiView.contentSize = CGSize(width: width,
+                                            height: uiView.frame.size.height)
+                uiView.contentOffset.x = width * context.coordinator.scrollOffsetPercentage
+                startPoint.wrappedValue = Int(uiView.contentOffset.x)
                 scrollerWidth.wrappedValue = Int(uiView.frame.width)
             }
+            
         }
     }
 }

@@ -36,7 +36,7 @@ struct ContentView: View {
                 fileController.loadAndProcessBuffer(pcmBuffer: pcmBuffer)
             }
             audioInputController.setupEngine()
-            audioInputController.start()
+            //audioInputController.start()
             cancelables.insert(
                 audioInputController
                     .dataPublisher
