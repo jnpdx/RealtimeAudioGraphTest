@@ -36,7 +36,9 @@ struct ContentView: View {
         
         
         .onAppear {
-            fileController.loadAudioFile(Bundle.main.url(forResource: "OriginalAudio", withExtension: "m4a")!)
+            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "OriginalAudio", withExtension: "m4a")!) {
+                fileController.loadAndProcessBuffer(pcmBuffer: pcmBuffer)
+            }
             audioInputController.setupEngine()
             audioInputController.start()
             cancelables.insert(

@@ -13,15 +13,44 @@ import os.log
 class AudioFileController : ObservableObject {
     @Published var audioBuffer : [Float] = []
     
-    func loadAudioFile(_ url: URL) {
+    func loadAndProcessBuffer(pcmBuffer: AVAudioPCMBuffer) {
+        let bufferLength = vDSP_Length(pcmBuffer.frameLength)
+        
+        var high:Float = 1.0
+        var low:Float = 0.0
+        
+        let pixelCount = Int(pcmBuffer.frameLength) / Int(kSamplesPerPixel)
+        let filter = [Float](repeating: 1.0/Float(kSamplesPerPixel), count: Int(kSamplesPerPixel))
+        
+        //TODO: all in place without a processing buffer?
+        var processingBuffer = [Float](repeating: 0.0, count: Int(pcmBuffer.frameLength))
+        
+        //TODO: change the order of these so that I'm cliping and abs-ing just the smaller processed buffer?
+        vDSP_vabs(pcmBuffer.floatChannelData![0], 1, &processingBuffer, 1, bufferLength)
+        vDSP_vclip(processingBuffer, 1, &low, &high, &processingBuffer, 1, bufferLength)
+        
+        var downsampledData = [Float](repeating: 0.0, count: pixelCount)
+        
+        vDSP_desamp(processingBuffer,
+                        vDSP_Stride(kSamplesPerPixel),
+                        filter,
+                        &downsampledData,
+                        vDSP_Length(pixelCount),
+                        vDSP_Length(kSamplesPerPixel))
+        self.audioBuffer = downsampledData
+    }
+    
+    func loadAudioFile(_ url: URL) ->AVAudioPCMBuffer? {
         guard let audioFile = try? AVAudioFile(forReading: url) else {
             fatalError("Couldn't load file")
         }
         guard let audioFileBuffer = audioFileToBuffer(audioFile) else {
             fatalError("Couldn't create buffer")
         }
-        self.audioBuffer = [Float](repeating: 0.0, count: Int(audioFileBuffer.frameLength))
-        memcpy(&self.audioBuffer, audioFileBuffer.floatChannelData!.pointee, MemoryLayout<Float32>.size * Int(audioFileBuffer.frameLength))
+        return audioFileBuffer
+        
+//        self.audioBuffer = [Float](repeating: 0.0, count: Int(audioFileBuffer.frameLength))
+//        memcpy(&self.audioBuffer, audioFileBuffer.floatChannelData!.pointee, MemoryLayout<Float32>.size * Int(audioFileBuffer.frameLength))
     }
 
     func audioFileToBuffer(_ audioFile: AVAudioFile) -> AVAudioPCMBuffer? {
