@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-let kSamplesPerPixel : UInt32 = 40
+let kSamplesPerPixel : UInt32 = 30
 
 struct AudioVisualization: View {
     var timestamp : UInt64
