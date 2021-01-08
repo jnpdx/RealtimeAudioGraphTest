@@ -10,6 +10,36 @@ import AVFoundation
 import Accelerate
 import os.log
 
+class AudioFileController : ObservableObject {
+    @Published var audioBuffer : [Float] = []
+    
+    func loadAudioFile(_ url: URL) {
+        guard let audioFile = try? AVAudioFile(forReading: url) else {
+            fatalError("Couldn't load file")
+        }
+        guard let audioFileBuffer = audioFileToBuffer(audioFile) else {
+            fatalError("Couldn't create buffer")
+        }
+        self.audioBuffer = [Float](repeating: 0.0, count: Int(audioFileBuffer.frameLength))
+        memcpy(&self.audioBuffer, audioFileBuffer.floatChannelData!.pointee, MemoryLayout<Float32>.size * Int(audioFileBuffer.frameLength))
+    }
+
+    func audioFileToBuffer(_ audioFile: AVAudioFile) -> AVAudioPCMBuffer? {
+        let audioFormat = audioFile.processingFormat
+        let audioFrameCount = UInt32(audioFile.length)
+        guard let audioFileBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: audioFrameCount) else {
+            fatalError("Couldn't make buffer")
+        }
+        print("Audio file format is: \(audioFormat) for \(audioFile.url.lastPathComponent)")
+        do{
+            try audioFile.read(into: audioFileBuffer)
+        } catch{
+            fatalError("Error reading into buffer: \(error)")
+        }
+        return audioFileBuffer
+    }
+}
+
 class AudioInputController : ObservableObject {
     var audioBuffer = [Float](repeating: 0.0, count: 9000)
     private let dataSubject = CurrentValueSubject<Float, Never>(0.0)
@@ -31,20 +61,20 @@ class AudioInputController : ObservableObject {
         let recordingFormat = audioEngine.inputNode.inputFormat(forBus: 0)
         audioEngine.inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (pcmBuffer, timestamp) in
             
-            let samplesPerPixel = 40
+            
             let bufferLength = vDSP_Length(pcmBuffer.frameLength)
             
             vDSP_vabs(pcmBuffer.floatChannelData![0], 1, &processingBuffer, 1, bufferLength)
             vDSP_vclip(processingBuffer, 1, &low, &high, &processingBuffer, 1, bufferLength)
             
-            let pixelCount = Int(pcmBuffer.frameLength) / samplesPerPixel
-            let filter = [Float](repeating: 1.0/Float(samplesPerPixel), count: Int(samplesPerPixel))
+            let pixelCount = Int(pcmBuffer.frameLength) / Int(kSamplesPerPixel)
+            let filter = [Float](repeating: 1.0/Float(kSamplesPerPixel), count: Int(kSamplesPerPixel))
             
             vDSP_desamp(processingBuffer,
-                            vDSP_Stride(samplesPerPixel),
+                            vDSP_Stride(kSamplesPerPixel),
                             filter, &processingBuffer,
                             vDSP_Length(pixelCount),
-                            vDSP_Length(samplesPerPixel))
+                            vDSP_Length(kSamplesPerPixel))
             
             
             memcpy(&processingBuffer2, &self.audioBuffer, MemoryLayout<Float32>.size * processingBuffer2.count)

@@ -12,15 +12,30 @@ struct ContentView: View {
     var audioInputController = AudioInputController()
     @State var timestamp : UInt64 = 0
     
+    @ObservedObject var fileController = AudioFileController()
+    
     @State private var cancelables = Set<AnyCancellable>()
     
     var body: some View {
-        AudioVisualization(timestamp: timestamp,
-                           bufferData: audioInputController.audioBuffer,
-                           startPoint: 0,
-                           endPoint: audioInputController.audioBuffer.count)
+        VStack {
+            AudioVisualization(timestamp: timestamp,
+                               bufferData: audioInputController.audioBuffer,
+                               startPoint: 0,
+                               endPoint: audioInputController.audioBuffer.count)
+            AudioVisualization(timestamp: 0,
+                               bufferData: fileController.audioBuffer,
+                               startPoint: 0,
+                               endPoint: min(500,fileController.audioBuffer.count))
+            AudioVisualization(timestamp: 0,
+                               bufferData: fileController.audioBuffer,
+                               startPoint: min(1000,fileController.audioBuffer.count),
+                               endPoint: min(4000,fileController.audioBuffer.count))
+        }
         .padding()
+        
+        
         .onAppear {
+            fileController.loadAudioFile(Bundle.main.url(forResource: "OriginalAudio", withExtension: "m4a")!)
             audioInputController.setupEngine()
             audioInputController.start()
             cancelables.insert(
