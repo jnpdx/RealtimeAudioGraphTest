@@ -42,7 +42,7 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
         var scrollView : UIScrollView?
         
         private var zoomScaleStart : CGFloat = 0
-        private var zoomScale: CGFloat = 0.5
+        private var zoomScale: CGFloat = 1.0
         
         var scrollViewWidth: CGFloat = 0
         var scrollOffsetPercentage : CGFloat = 0
@@ -55,6 +55,7 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
             self.endPoint = end
         }
         
+        //this is not getting called while zooming
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             guard !ignoreScrollEvents else {
                 return
@@ -89,7 +90,7 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
             case let scale where scale < 1.0:
                 newZoom = max(scale * zoomScaleStart, 0.2)
             case let scale where scale > 1.0:
-                newZoom = min(scale * zoomScaleStart, 3.0)
+                newZoom = min(scale * zoomScaleStart, 5.0)
             default:
                 break
             }
@@ -100,12 +101,30 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
         }
         
         func postZoomCalculations(originalZoom: CGFloat, newZoom: CGFloat) {
-//            guard let scrollView = self.scrollView else {
-//                fatalError()
-//            }
+            guard let scrollView = self.scrollView else {
+                fatalError()
+            }
+            
+            ignoreScrollEvents = true
+            
+            let oldScrollOffset = scrollOffsetPercentage
             
             zoomScale = newZoom
             updateBindings()
+            
+            //set the new scrollOffset appropriately
+            scrollView.contentOffset.x = oldScrollOffset * scrollView.contentSize.width
+            
+            if scrollView.contentSize.width <= scrollView.bounds.width {
+                scrollView.showsHorizontalScrollIndicator = false
+            } else {
+                scrollView.showsHorizontalScrollIndicator = true
+            }
+            
+            DispatchQueue.main.async {
+                self.ignoreScrollEvents = false
+            }
+
         }
         
         var windowSize: CGFloat {
@@ -122,14 +141,16 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
             }
             scrollView.contentSize = CGSize(width: contentWidth,
                                             height: scrollView.frame.size.height)
-            //this doesn't keep things centered yet
-            scrollOffsetPercentage = scrollView.contentOffset.x / scrollView.contentSize.width
-            
+                        
+            //this may be useless, since it doesn't get called
+            if !ignoreScrollEvents {
+                scrollOffsetPercentage = scrollView.contentOffset.x / scrollView.contentSize.width
+            }
             
             let startPoint = CGFloat(bufferLength) * scrollOffsetPercentage
             let endPoint = startPoint + windowSize
             
-            //print("Start point: \(startPoint) - \(endPoint) vs buffer: \(bufferLength)")
+            //print("Start point: \(startPoint) - \(endPoint) vs buffer: \(bufferLength) scrollOffsetPerc: \(scrollOffsetPercentage)")
             
             self.startPoint.wrappedValue = Int(startPoint)
             self.endPoint.wrappedValue = min(bufferLength,Int(endPoint))
