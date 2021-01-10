@@ -155,10 +155,13 @@ struct AudioVisualizationScroller_ScrollView : UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        context.coordinator.scrollViewWidth = uiView.frame.width
-        context.coordinator.bufferLength = bufferLength
-        DispatchQueue.main.async {
-            context.coordinator.updateBindings()
+        if uiView.frame.width != context.coordinator.scrollViewWidth || context.coordinator.bufferLength != bufferLength {
+            print("update ui view")
+            context.coordinator.scrollViewWidth = uiView.frame.width
+            context.coordinator.bufferLength = bufferLength
+            DispatchQueue.main.async {
+                context.coordinator.updateBindings()
+            }
         }
     }
 }
