@@ -11,7 +11,6 @@ import SwiftUI
 let kSamplesPerPixel : UInt32 = 230
 
 struct AudioVisualization: View {
-    var timestamp : UInt64
     var bufferData : [Float]
     var startPoint : Int
     var endPoint : Int

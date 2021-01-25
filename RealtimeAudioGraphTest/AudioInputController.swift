@@ -71,7 +71,7 @@ class AudioFileController : ObservableObject {
 
 class AudioInputController : ObservableObject {
     var audioBuffer = [Float](repeating: 0.0, count: 9000)
-    private let dataSubject = CurrentValueSubject<Float, Never>(0.0)
+    private let dataSubject = PassthroughSubject<Float, Never>()
     var dataPublisher : AnyPublisher<Float, Never> {
         dataSubject
             .eraseToAnyPublisher()
