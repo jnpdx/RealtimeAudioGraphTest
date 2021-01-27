@@ -16,8 +16,7 @@ struct AudioVisualizationScroller : View {
     
     var body: some View {
         ZStack {
-            AudioVisualization(timestamp: 0,
-                               bufferData: bufferData,
+            AudioVisualization(bufferData: bufferData,
                                startPoint: startPoint,
                                endPoint: endPoint)
             AudioVisualizationScroller_ScrollView(bufferLength: bufferData.count,

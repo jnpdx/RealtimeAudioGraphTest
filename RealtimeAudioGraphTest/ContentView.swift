@@ -32,11 +32,11 @@ struct ContentView: View {
         
         
         .onAppear {
-            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "OriginalAudio", withExtension: "m4a")!) {
+            if let pcmBuffer = fileController.loadAudioFile(Bundle.main.url(forResource: "Sweet Georgia Brown", withExtension: "m4a")!) {
                 fileController.loadAndProcessBuffer(pcmBuffer: pcmBuffer)
             }
-            audioInputController.setupEngine()
-            audioInputController.start()
+            //audioInputController.setupEngine()
+            //audioInputController.start()
             audioInputController
                 .dataPublisher
                 .receive(on: RunLoop.main) //might have to use DispatchQueue.main for iOS to continue scrolling
